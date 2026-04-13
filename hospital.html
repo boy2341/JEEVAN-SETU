@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Hospital Registration | Jeevan Setu</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Work+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary": "#ffffff", "inverse-on-surface": "#f3f0ef", "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#ebe7e7", "surface-dim": "#dcd9d9", "secondary": "#4b6457",
+            "on-primary-fixed": "#241a00", "on-primary-container": "#6f5500", "outline": "#7f7664",
+            "on-tertiary-container": "#5c584b", "on-background": "#1c1b1b", "on-tertiary": "#ffffff",
+            "on-secondary-fixed-variant": "#344c40", "surface-tint": "#765b00", "on-surface": "#1c1b1b",
+            "tertiary": "#625e51", "tertiary-container": "#d6cfbe", "on-secondary-container": "#4f685b",
+            "secondary-fixed-dim": "#b2cdbd", "outline-variant": "#d1c5b0", "on-secondary-fixed": "#072016",
+            "surface-container": "#f0edec", "inverse-primary": "#ebc254", "background": "#fcf8f8",
+            "on-error-container": "#93000a", "surface-variant": "#e5e2e1", "on-secondary": "#ffffff",
+            "surface": "#fcf8f8", "on-tertiary-fixed": "#1e1c11", "tertiary-fixed": "#e9e2d1",
+            "surface-container-highest": "#e5e2e1", "surface-container-low": "#f6f3f2",
+            "primary-fixed": "#ffdf93", "on-primary-fixed-variant": "#594400", "tertiary-fixed-dim": "#cdc6b6",
+            "on-tertiary-fixed-variant": "#4a473a", "error-container": "#ffdad6", "surface-bright": "#fcf8f8",
+            "secondary-fixed": "#cde9d9", "primary-fixed-dim": "#ebc254", "on-error": "#ffffff",
+            "primary": "#765b00", "error": "#ba1a1a", "secondary-container": "#cae6d6",
+            "inverse-surface": "#313030", "on-surface-variant": "#4d4636", "primary-container": "#f5cb5c"
+          },
+          "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+          "fontFamily": { "headline": ["Noto Serif"], "body": ["Work Sans"], "label": ["Work Sans"] }
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    body {
+      font-family: 'Work Sans', sans-serif;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Noto Serif', serif;
+    }
+
+    .rating-star {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .rating-star:hover,
+    .rating-star.active {
+      color: #765b00;
+      font-variation-settings: 'FILL' 1;
+    }
+
+    #success-banner {
+      transform: translateY(-100%);
+      transition: transform 0.4s ease;
+    }
+
+    #success-banner.show {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body class="bg-surface text-on-surface flex flex-col min-h-screen">
+
+  <!-- Success Banner -->
+  <div id="success-banner"
+    class="fixed top-0 left-0 right-0 z-[100] bg-secondary text-white p-4 text-center font-bold uppercase tracking-wider text-sm">
+    <span class="material-symbols-outlined align-middle text-sm">check_circle</span>
+    Hospital registered successfully! It will appear in our network after verification.
+    <button onclick="hideBanner()" class="ml-4 underline text-xs">Dismiss</button>
+  </div>
+
+  <!-- TopNavBar -->
+  <nav class="bg-white border-b border-outline-variant/30 sticky top-0 z-50">
+    <div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+      <a href="entry.html" class="text-2xl font-serif font-bold text-on-surface">Jeevan Setu</a>
+      <div class="hidden md:flex items-center gap-8">
+        <a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="entry.html">Find
+          Care</a>
+        <a class="text-primary font-bold border-b-2 border-primary hover:text-primary transition-colors"
+          href="#">Register Hospital</a>
+        <a class="text-on-surface-variant font-medium hover:text-primary transition-colors"
+          href="emergency.html">Emergency Info</a>
+      </div>
+      <div class="flex items-center gap-4">
+        <button onclick="window.location.href='emergency.html'"
+          class="bg-primary text-on-primary px-6 py-2 rounded-lg font-semibold shadow-sm hover:opacity-90 transition-all">
+          Emergency Call
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-grow w-full max-w-7xl mx-auto px-6 py-12 md:py-16 lg:flex gap-16">
+    <!-- Sidebar -->
+    <aside class="lg:w-1/3 mb-12 lg:mb-0">
+      <div class="sticky top-32">
+        <p class="text-primary font-bold tracking-[0.2em] text-xs uppercase mb-4">Registration Gateway</p>
+        <h1 class="text-5xl font-bold text-on-surface leading-tight mb-8">Add New Hospital Details</h1>
+        <p class="text-on-surface-variant leading-relaxed max-w-sm mb-12">
+          Join our network of primary healthcare providers. Your registration ensures accessible medical support for
+          rural communities.
+        </p>
+        <div class="border-l-4 border-primary pl-6 py-2">
+          <h3 class="text-xl font-bold mb-2">Network Integrity</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            Every institution in the Jeevan Setu Network is verified for capacity and specialization.
+          </p>
+        </div>
+
+        <!-- Registered count display -->
+        <div class="mt-8 p-4 bg-surface-container-low rounded-lg">
+          <p class="text-xs uppercase tracking-widest text-outline font-bold mb-1">Registered Facilities</p>
+          <p class="text-2xl font-black" id="facility-count">Loading...</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Form -->
+    <div class="lg:w-2/3">
+      <form id="hospital-form" class="space-y-12">
+        <!-- 01 Identity -->
+        <section>
+          <div class="flex items-center gap-4 mb-8">
+            <span class="text-[10px] tracking-[0.2em] font-bold text-primary uppercase">01 Identity</span>
+            <span class="h-[1px] flex-grow bg-outline-variant/30"></span>
+          </div>
+          <div class="grid grid-cols-1 gap-8">
+            <div class="group">
+              <label class="block text-xs font-semibold tracking-wider text-outline uppercase mb-2"
+                for="institution_name">Institution Identity</label>
+              <input
+                class="w-full text-xl py-3 bg-white border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-surface-dim transition-all outline-none font-headline"
+                id="institution_name" name="institution_name" placeholder="Full Legal Name of Hospital" type="text"
+                required />
+            </div>
+          </div>
+        </section>
+
+        <!-- 02 Logistics -->
+        <section>
+          <div class="flex items-center gap-4 mb-8">
+            <span class="text-[10px] tracking-[0.2em] font-bold text-primary uppercase">02 Logistics</span>
+            <span class="h-[1px] flex-grow bg-outline-variant/30"></span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="group">
+              <label class="block text-xs font-semibold tracking-wider text-outline uppercase mb-2"
+                for="geo_coords">Geographic Coordinates</label>
+              <div class="relative">
+                <input
+                  class="w-full text-lg py-3 bg-white border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-surface-dim transition-all outline-none"
+                  id="geo_coords" name="geo_coords" placeholder="Lat, Long" type="text" />
+                <button type="button" onclick="detectLocation()"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-primary font-bold uppercase hover:underline">
+                  Detect
+                </button>
+              </div>
+              <p class="text-xs text-outline mt-1">Click Detect to autofill from GPS</p>
+            </div>
+            <div class="group">
+              <label class="block text-xs font-semibold tracking-wider text-outline uppercase mb-2"
+                for="contact_line">Direct Contact Line</label>
+              <input
+                class="w-full text-lg py-3 bg-white border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-surface-dim transition-all outline-none"
+                id="contact_line" name="contact_line" placeholder="+91 (___) ___-____" type="tel" />
+            </div>
+          </div>
+        </section>
+
+        <!-- 03 Capabilities -->
+        <section>
+          <div class="flex items-center gap-4 mb-8">
+            <span class="text-[10px] tracking-[0.2em] font-bold text-primary uppercase">03 Capabilities</span>
+            <span class="h-[1px] flex-grow bg-outline-variant/30"></span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="group">
+              <label class="block text-xs font-semibold tracking-wider text-outline uppercase mb-2"
+                for="bed_capacity">Total Bed Capacity</label>
+              <input
+                class="w-full text-lg py-3 bg-white border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-surface-dim transition-all outline-none"
+                id="bed_capacity" name="bed_capacity" placeholder="Numerical Count" type="number" min="1" />
+            </div>
+            <div class="group">
+              <label class="block text-xs font-semibold tracking-wider text-outline uppercase mb-2"
+                for="specialization">Primary Specialization</label>
+              <select
+                class="w-full text-lg py-3 bg-white border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-on-surface-variant transition-all outline-none appearance-none cursor-pointer"
+                id="specialization" name="specialization">
+                <option disabled selected value="">Select Medical focus</option>
+                <option value="general">General Healthcare</option>
+                <option value="maternity">Maternal &amp; Child Care</option>
+                <option value="emergency">Trauma &amp; Emergency</option>
+                <option value="oncology">Regional Oncology</option>
+                <option value="cardiology">Cardiovascular Services</option>
+              </select>
+            </div>
+          </div>
+          <!-- ICU Beds separately -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+            <div>
+              <label class="block text-xs font-semibold tracking-wider text-outline uppercase mb-2" for="icu_beds">ICU
+                Beds Available</label>
+              <input
+                class="w-full text-lg py-3 bg-white border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-surface-dim transition-all outline-none"
+                id="icu_beds" name="icu_beds" placeholder="0 if none" type="number" min="0" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold tracking-wider text-outline uppercase mb-2"
+                for="hospital_type">Hospital Type</label>
+              <select
+                class="w-full text-lg py-3 bg-white border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-on-surface-variant transition-all outline-none appearance-none cursor-pointer"
+                id="hospital_type" name="hospital_type">
+                <option disabled selected value="">Select Type</option>
+                <option value="Level 1 Trauma">Level 1 Trauma</option>
+                <option value="Community Hospital">Community Hospital</option>
+                <option value="Regional General">Regional General</option>
+                <option value="PHC">Primary Health Centre (PHC)</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 04 Regulatory -->
+        <section>
+          <div class="flex items-center gap-4 mb-8">
+            <span class="text-[10px] tracking-[0.2em] font-bold text-primary uppercase">04 Regulatory</span>
+            <span class="h-[1px] flex-grow bg-outline-variant/30"></span>
+          </div>
+          <div class="grid grid-cols-1 gap-8">
+            <div class="group">
+              <label class="block text-xs font-semibold tracking-wider text-outline uppercase mb-2"
+                for="gov_id">Government Hospital ID</label>
+              <input
+                class="w-full text-lg py-3 bg-white border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-surface-dim transition-all outline-none"
+                id="gov_id" name="gov_id" placeholder="Reg #12345-ABCD" type="text" />
+            </div>
+            <div class="group">
+              <label class="block text-xs font-semibold tracking-wider text-outline uppercase mb-6">Supported Government
+                Schemes</label>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input
+                    class="w-5 h-5 border-outline-variant rounded text-primary focus:ring-primary transition-all cursor-pointer"
+                    type="checkbox" value="PM-JAY" name="scheme" />
+                  <span class="text-on-surface-variant text-sm font-medium">PM-JAY (Ayushman Bharat)</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input
+                    class="w-5 h-5 border-outline-variant rounded text-primary focus:ring-primary transition-all cursor-pointer"
+                    type="checkbox" value="State Health" name="scheme" />
+                  <span class="text-on-surface-variant text-sm font-medium">State Health Scheme</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input
+                    class="w-5 h-5 border-outline-variant rounded text-primary focus:ring-primary transition-all cursor-pointer"
+                    type="checkbox" value="CGHS" name="scheme" />
+                  <span class="text-on-surface-variant text-sm font-medium">Central Govt Health Scheme (CGHS)</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input
+                    class="w-5 h-5 border-outline-variant rounded text-primary focus:ring-primary transition-all cursor-pointer"
+                    type="checkbox" value="ESI" name="scheme" />
+                  <span class="text-on-surface-variant text-sm font-medium">ESI Scheme</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Admin Section -->
+        <section class="mt-16 pt-12 border-t border-outline-variant/30">
+          <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="material-symbols-outlined text-primary">admin_panel_settings</span>
+              <h2 class="text-sm font-bold tracking-widest uppercase">For Admin Use Only</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="space-y-3">
+                <label class="block text-[10px] font-bold tracking-widest text-outline uppercase">Internal Quality
+                  Rating</label>
+                <div class="flex gap-2" id="star-rating">
+                  <span class="material-symbols-outlined rating-star text-2xl text-outline-variant"
+                    data-val="1">star</span>
+                  <span class="material-symbols-outlined rating-star text-2xl text-outline-variant"
+                    data-val="2">star</span>
+                  <span class="material-symbols-outlined rating-star text-2xl text-outline-variant"
+                    data-val="3">star</span>
+                  <span class="material-symbols-outlined rating-star text-2xl text-outline-variant"
+                    data-val="4">star</span>
+                  <span class="material-symbols-outlined rating-star text-2xl text-outline-variant"
+                    data-val="5">star</span>
+                </div>
+                <input type="hidden" id="rating-value" value="0" />
+              </div>
+              <div class="space-y-3">
+                <label class="block text-[10px] font-bold tracking-widest text-outline uppercase">Verification
+                  Status</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input class="sr-only peer" type="checkbox" id="verified-toggle" />
+                  <div
+                    class="w-11 h-6 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary">
+                  </div>
+                  <span class="ms-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Verified
+                    Institution</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Submit -->
+        <div class="pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <p class="text-[10px] text-outline uppercase tracking-wider">Declaration: Provided clinical data is accurate.
+          </p>
+          <button
+            class="w-full md:w-auto bg-primary text-on-primary px-10 py-4 rounded-lg font-bold text-base hover:opacity-90 transition-all"
+            type="submit" id="submit-btn">
+            Register Institution
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="bg-surface-container-high border-t border-outline-variant/30 p-12 mt-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 px-6 max-w-7xl mx-auto">
+      <div class="space-y-4">
+        <div class="text-lg font-serif font-bold text-on-surface">Jeevan Setu</div>
+        <p class="text-on-surface-variant max-w-md text-xs leading-relaxed uppercase tracking-wider font-label">
+          © 2024 Jeevan Setu Health Network. Dedicated to accessible rural healthcare.
+        </p>
+      </div>
+      <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+        <a class="text-on-surface-variant hover:text-primary transition-all text-[10px] font-label tracking-widest uppercase"
+          href="#">Privacy Policy</a>
+        <a class="text-on-surface-variant hover:text-primary transition-all text-[10px] font-label tracking-widest uppercase"
+          href="#">Terms of Service</a>
+        <a class="text-on-surface-variant hover:text-primary transition-all text-[10px] font-label tracking-widest uppercase"
+          href="#">Contact Support</a>
+        <a class="text-on-surface-variant hover:text-primary transition-all text-[10px] font-label tracking-widest uppercase"
+          href="#">Emergency Protocol</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Star Rating ────────────────────────────────────────────────────────────
+    document.querySelectorAll('.rating-star').forEach(star => {
+      star.addEventListener('click', () => {
+        const val = parseInt(star.dataset.val);
+        document.getElementById('rating-value').value = val;
+        document.querySelectorAll('.rating-star').forEach((s, i) => {
+          s.classList.toggle('active', i < val);
+        });
+      });
+    });
+
+    // ── Geolocation autofill ───────────────────────────────────────────────────
+    function detectLocation() {
+      const field = document.getElementById('geo_coords');
+      field.placeholder = 'Detecting...';
+      if (!navigator.geolocation) { field.placeholder = 'GPS unavailable'; return; }
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          field.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+          sessionStorage.setItem('rc_location', JSON.stringify({ lat, lng }));
+        },
+        () => { field.placeholder = 'Could not detect location'; },
+        { timeout: 8000, enableHighAccuracy: true }
+      );
+    }
+
+    // ── LocalStorage DB ────────────────────────────────────────────────────────
+    function getHospitals() {
+      try { return JSON.parse(localStorage.getItem('rc_hospitals') || '[]'); } catch { return []; }
+    }
+    function saveHospitals(arr) {
+      try { localStorage.setItem('rc_hospitals', JSON.stringify(arr)); } catch { }
+    }
+
+    function updateCount() {
+      const baseCount = 5; // default seeded hospitals
+      const registered = getHospitals().length;
+      document.getElementById('facility-count').textContent = baseCount + registered;
+    }
+
+    // ── Form submission ────────────────────────────────────────────────────────
+    document.getElementById('hospital-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Registering...';
+
+      const schemes = [...document.querySelectorAll('input[name="scheme"]:checked')].map(c => c.value);
+      const coordsRaw = document.getElementById('geo_coords').value;
+      let lat = null, lng = null;
+      if (coordsRaw) {
+        const parts = coordsRaw.split(',').map(s => parseFloat(s.trim()));
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) { lat = parts[0]; lng = parts[1]; }
+      }
+
+      const bedCapacity = parseInt(document.getElementById('bed_capacity').value) || 0;
+      const icuBeds = parseInt(document.getElementById('icu_beds').value) || 0;
+
+      const hospital = {
+        id: Date.now(),
+        name: document.getElementById('institution_name').value,
+        type: document.getElementById('hospital_type').value || 'Community Hospital',
+        lat: lat || 28.6139 + (Math.random() - 0.5) * 0.5,
+        lng: lng || 77.2090 + (Math.random() - 0.5) * 0.5,
+        contact: document.getElementById('contact_line').value || '+91-000-000-0000',
+        beds: { icu: icuBeds, general: bedCapacity - icuBeds },
+        specialization: document.getElementById('specialization').value || 'General Healthcare',
+        govSchemes: schemes,
+        verified: document.getElementById('verified-toggle').checked,
+        rating: parseInt(document.getElementById('rating-value').value) || 3,
+        govId: document.getElementById('gov_id').value,
+        registeredAt: new Date().toISOString()
+      };
+
+      // Save to localStorage (acts as local DB / cache)
+      const hospitals = getHospitals();
+      hospitals.push(hospital);
+      saveHospitals(hospitals);
+      updateCount();
+
+      // Show success banner
+      const banner = document.getElementById('success-banner');
+      banner.classList.add('show');
+      btn.textContent = 'Registered ✓';
+      setTimeout(() => {
+        banner.classList.remove('show');
+        btn.disabled = false;
+        btn.textContent = 'Register Institution';
+        document.getElementById('hospital-form').reset();
+        document.querySelectorAll('.rating-star').forEach(s => s.classList.remove('active'));
+      }, 4000);
+    });
+
+    function hideBanner() {
+      document.getElementById('success-banner').classList.remove('show');
+    }
+
+    window.addEventListener('DOMContentLoaded', updateCount);
+  </script>
+</body>
+
+</html>

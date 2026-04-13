@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Emergency Hospital List | Jeevan Setu</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Work+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Leaflet for OpenStreetMap -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary": "#ffffff", "surface-container-lowest": "#ffffff", "surface-container-high": "#ebe7e7",
+            "surface-dim": "#dcd9d9", "secondary": "#4b6457", "on-primary-fixed": "#241a00",
+            "on-primary-container": "#241a00", "outline": "#7f7664", "on-background": "#1c1b1b",
+            "on-surface": "#000000", "tertiary": "#625e51", "on-secondary-container": "#4f685b",
+            "outline-variant": "#d1c5b0", "surface-container": "#f0edec", "background": "#ffffff",
+            "surface-variant": "#e5e2e1", "on-secondary": "#ffffff", "surface": "#ffffff",
+            "surface-container-highest": "#e5e2e1", "surface-container-low": "#f6f3f2",
+            "primary-fixed": "#ffdf93", "surface-bright": "#fcf8f8", "secondary-fixed": "#cde9d9",
+            "primary-fixed-dim": "#ebc254", "on-error": "#ffffff", "primary": "#765b00", "error": "#ba1a1a",
+            "secondary-container": "#cae6d6", "inverse-surface": "#313030", "on-surface-variant": "#1c1b1b",
+            "primary-container": "#f5cb5c"
+          },
+          "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+          "fontFamily": { "headline": ["Noto Serif"], "body": ["Work Sans"], "label": ["Work Sans"] }
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    body {
+      font-family: 'Work Sans', sans-serif;
+      color: #000;
+    }
+
+    h1,
+    h2,
+    h3,
+    .serif {
+      font-family: 'Noto Serif', serif;
+    }
+
+    #map {
+      height: 400px;
+      width: 100%;
+      border: 4px solid black;
+    }
+
+    .hospital-card {
+      transition: all 0.2s ease;
+    }
+
+    .hospital-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .ai-reasoning {
+      font-size: 0.75rem;
+      line-height: 1.5;
+      color: #4d4636;
+    }
+
+    .ai-badge {
+      background: linear-gradient(135deg, #765b00, #f5cb5c);
+      color: white;
+      font-size: 0.6rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+    }
+
+    #ai-panel {
+      border-left: 4px solid #765b00;
+    }
+
+    .loading-pulse {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.4
+      }
+    }
+
+    .view-btn.active {
+      background: black;
+      color: white;
+    }
+
+    #map-view {
+      display: none;
+    }
+  </style>
+</head>
+
+<body class="bg-white text-black flex flex-col min-h-screen">
+
+  <!-- TopNavBar -->
+  <nav class="bg-white border-b border-stone-200 sticky top-0 z-50">
+    <div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+      <a href="entry.html" class="text-2xl font-serif font-bold text-black">Jeevan Setu</a>
+      <div class="hidden md:flex items-center space-x-8">
+        <a class="text-black font-medium hover:underline transition-colors" href="entry.html">Find Care</a>
+        <a class="text-black font-medium hover:underline transition-colors" href="hospital.html">Register Hospital</a>
+        <a class="text-black font-bold border-b-2 border-black transition-colors" href="#">Emergency Info</a>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button onclick="callEmergency()"
+          class="bg-primary-container text-on-primary-container px-5 py-2 rounded-lg font-bold border-2 border-black">Emergency
+          Call</button>
+        <span class="material-symbols-outlined text-black cursor-pointer">language</span>
+        <span class="material-symbols-outlined text-black cursor-pointer">account_circle</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-8">
+    <!-- Hero -->
+    <header class="mb-12">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 class="text-5xl md:text-6xl font-bold text-black leading-tight mb-4">Critical Care Locator</h1>
+          <p class="text-xl text-black max-w-2xl font-medium">
+            Real-time emergency updates for medical facilities in your immediate vicinity. Immediate action saves lives.
+          </p>
+          <div id="location-info" class="mt-3 text-sm font-medium text-stone-600 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm loading-pulse">location_searching</span>
+            <span id="location-text">Detecting location...</span>
+          </div>
+        </div>
+        <div class="flex gap-2 p-1 bg-stone-100 rounded-lg border border-stone-300">
+          <button id="list-view-btn"
+            class="view-btn active px-6 py-2 rounded text-sm font-bold tracking-wider flex items-center gap-2 transition-all"
+            onclick="switchView('list')">
+            <span class="material-symbols-outlined text-sm">list</span> LIST VIEW
+          </button>
+          <button id="map-view-btn"
+            class="view-btn px-6 py-2 rounded text-sm font-bold tracking-wider text-black flex items-center gap-2 hover:bg-stone-200 transition-all"
+            onclick="switchView('map')">
+            <span class="material-symbols-outlined text-sm">map</span> MAP VIEW
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+      <!-- Left: Hospital List / Map -->
+      <div class="lg:col-span-8">
+
+        <!-- AI Recommendation Panel -->
+        <div id="ai-panel" class="bg-stone-50 p-6 mb-8 hidden">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="ai-badge">AI POWERED</span>
+            <span class="font-bold text-sm uppercase tracking-wider">Smart Recommendation</span>
+            <span id="ai-loading" class="loading-pulse text-xs text-stone-400 hidden">Analyzing hospitals...</span>
+          </div>
+          <div id="ai-recommendation" class="ai-reasoning"></div>
+        </div>
+
+        <!-- List View -->
+        <div id="list-view">
+          <div id="hospitals-container" class="space-y-8">
+            <!-- Dynamically injected -->
+            <div class="text-center py-16 loading-pulse text-stone-400 font-bold tracking-widest uppercase text-sm">
+              Loading nearby facilities...
+            </div>
+          </div>
+        </div>
+
+        <!-- Map View -->
+        <div id="map-view">
+          <div id="map"></div>
+          <p class="text-xs text-stone-500 mt-2 font-medium">Map data © OpenStreetMap contributors</p>
+        </div>
+      </div>
+
+      <!-- Right: Protocol & Stats -->
+      <aside class="lg:col-span-4 space-y-10">
+        <div class="bg-black text-white p-10 border-4 border-black">
+          <div class="mb-8">
+            <span
+              class="bg-primary-container text-black font-black tracking-widest text-xs uppercase px-2 py-1 mb-4 inline-block">Immediate
+              Protocol</span>
+            <h3 class="text-4xl font-bold mb-6 serif">Action Items</h3>
+            <ul class="space-y-6">
+              <li class="flex items-start gap-4">
+                <span
+                  class="w-8 h-8 bg-white text-black flex items-center justify-center text-lg font-black shrink-0">1</span>
+                <p class="text-stone-100 text-base font-medium leading-tight">Call the hospital in advance to confirm
+                  specialist availability.</p>
+              </li>
+              <li class="flex items-start gap-4">
+                <span
+                  class="w-8 h-8 bg-white text-black flex items-center justify-center text-lg font-black shrink-0">2</span>
+                <p class="text-stone-100 text-base font-medium leading-tight">Prepare your Jeevan Setu Digital ID card
+                  for expedited intake.</p>
+              </li>
+              <li class="flex items-start gap-4">
+                <span
+                  class="w-8 h-8 bg-white text-black flex items-center justify-center text-lg font-black shrink-0">3</span>
+                <p class="text-stone-100 text-base font-medium leading-tight">If transport is unstable, call local EMS
+                  via the orange button.</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Live Stats -->
+        <div class="space-y-4">
+          <div class="bg-white border-4 border-black p-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <span class="material-symbols-outlined text-primary text-3xl font-bold">emergency_share</span>
+              <div>
+                <p class="text-xs uppercase text-stone-500 font-bold tracking-widest">Avg Dispatch</p>
+                <p class="text-2xl font-black serif">8.4 min</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-stone-300">trending_down</span>
+          </div>
+          <div class="bg-white border-4 border-black p-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <span class="material-symbols-outlined text-secondary text-3xl font-bold">health_and_safety</span>
+              <div>
+                <p class="text-xs uppercase text-stone-500 font-bold tracking-widest">Success Rate</p>
+                <p class="text-2xl font-black serif">98.2%</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-stone-300">check_circle</span>
+          </div>
+        </div>
+
+        <!-- Resources -->
+        <div class="border-t-2 border-stone-200 pt-6">
+          <h4 class="font-bold text-sm uppercase tracking-widest mb-4">Resource Center</h4>
+          <div class="grid grid-cols-1 gap-3">
+            <a class="flex items-center justify-between font-bold text-black border border-stone-300 p-3 hover:bg-stone-50"
+              href="#">
+              <span>Insurance Guide</span><span class="material-symbols-outlined">chevron_right</span>
+            </a>
+            <a class="flex items-center justify-between font-bold text-black border border-stone-300 p-3 hover:bg-stone-50"
+              href="#">
+              <span>Digital Health ID</span><span class="material-symbols-outlined">chevron_right</span>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="bg-stone-50 border-t border-stone-200 p-12 mt-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 px-6 max-w-7xl mx-auto">
+      <div>
+        <div class="text-xl font-serif font-bold text-black mb-4">Jeevan Setu Health Network</div>
+        <p class="text-stone-600 text-xs uppercase tracking-widest font-bold mb-4">© 2024 Jeevan Setu Health Network.
+          Accessible Rural Healthcare.</p>
+      </div>
+      <div class="flex flex-wrap gap-x-8 gap-y-4 md:justify-end items-center">
+        <a class="text-stone-800 hover:underline font-bold text-sm" href="#">Privacy Policy</a>
+        <a class="text-stone-800 hover:underline font-bold text-sm" href="#">Terms of Service</a>
+        <a class="text-stone-800 hover:underline font-bold text-sm" href="#">Contact Support</a>
+        <a class="text-black font-black underline underline-offset-4 text-sm" href="#">Emergency Protocol</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Jeevan Setu Backend Logic ────────────────────────────────────────────────
+
+    const HOSPITALS = [
+      { id: 1, name: "St. Jude Rural Medical Center", type: "Level 1 Trauma", lat: 28.6448, lng: 77.2167, contact: "+91-11-2345-6789", beds: { icu: 4, general: 28 }, specialization: "Trauma & Emergency", govSchemes: ["PM-JAY", "CGHS"], verified: true, rating: 5 },
+      { id: 2, name: "Valley View Specialty Clinic", type: "Community Hospital", lat: 28.6289, lng: 77.2065, contact: "+91-11-2345-7890", beds: { icu: 12, general: 45 }, specialization: "Maternal & Child Care", govSchemes: ["PM-JAY", "State Health"], verified: true, rating: 4 },
+      { id: 3, name: "Mountain Ridge General", type: "Regional General", lat: 28.5921, lng: 77.0460, contact: "+91-11-2345-8901", beds: { icu: 0, general: 8 }, specialization: "General Healthcare", govSchemes: ["State Health"], verified: true, rating: 3 },
+      { id: 4, name: "Aravali Primary Health Centre", type: "PHC", lat: 28.4595, lng: 77.0266, contact: "+91-124-456-7890", beds: { icu: 2, general: 20 }, specialization: "General Healthcare", govSchemes: ["PM-JAY", "ESI"], verified: true, rating: 4 },
+      { id: 5, name: "Ganga Rural Medical Trust", type: "Community Hospital", lat: 28.7041, lng: 77.1025, contact: "+91-11-3456-7890", beds: { icu: 6, general: 35 }, specialization: "Cardiovascular Services", govSchemes: ["PM-JAY", "CGHS", "ESI"], verified: true, rating: 5 },
+    ];
+
+    let userLat = null, userLng = null, leafletMap = null, currentView = 'list';
+
+    // ── Haversine distance ────────────────────────────────────────────────────
+    function haversine(lat1, lng1, lat2, lng2) {
+      const R = 6371, r = x => x * Math.PI / 180;
+      const dLat = r(lat2 - lat1), dLng = r(lng2 - lng1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(r(lat1)) * Math.cos(r(lat2)) * Math.sin(dLng / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    // ── Scoring algorithm ─────────────────────────────────────────────────────
+    // Weights: bed availability (40%), distance (30%), rating (15%), ICU presence (10%), schemes (5%)
+    function scoreHospital(h, userLat, userLng) {
+      const dist = haversine(userLat, userLng, h.lat, h.lng);
+      const totalBeds = h.beds.icu + h.beds.general;
+      const bedScore = Math.min(totalBeds / 50, 1) * 40;           // 0-40
+      const distScore = Math.max(0, (50 - dist) / 50) * 30;         // 0-30 (closer = better)
+      const ratingScore = (h.rating / 5) * 15;                        // 0-15
+      const icuScore = h.beds.icu > 0 ? 10 : 0;                    // 0-10
+      const schemeScore = Math.min(h.govSchemes.length / 4, 1) * 5;  // 0-5
+      return { total: bedScore + distScore + ratingScore + icuScore + schemeScore, dist, bedScore, distScore, ratingScore, icuScore, schemeScore };
+    }
+
+    // ── Sort hospitals by score ───────────────────────────────────────────────
+    function getSortedHospitals(lat, lng) {
+      return HOSPITALS.map(h => ({ ...h, score: scoreHospital(h, lat, lng) }))
+        .sort((a, b) => b.score.total - a.score.total);
+    }
+
+    // ── Render hospital card (preserving original UI) ─────────────────────────
+    function renderCard(h, rank) {
+      const dist = h.score.dist.toFixed(1);
+      const distMi = (h.score.dist * 0.621).toFixed(1);
+      const icuFull = h.beds.icu === 0;
+      const typeColors = {
+        "Level 1 Trauma": "bg-error text-white",
+        "Community Hospital": "bg-secondary text-white",
+        "Regional General": "bg-stone-400 text-white",
+        "PHC": "bg-secondary-container text-secondary"
+      };
+      const borderClass = rank === 0 ? "border-4 border-black" : "border-2 border-stone-300";
+      const bgClass = rank === 0 ? "bg-white" : (rank >= 2 ? "bg-stone-50" : "bg-white");
+
+      return `
+  <article class="hospital-card ${bgClass} p-8 ${borderClass} relative" data-id="${h.id}">
+    <div class="flex flex-col sm:flex-row justify-between gap-8">
+      <div class="flex-grow">
+        <div class="flex items-center gap-4 mb-3 flex-wrap">
+          <span class="${typeColors[h.type] || 'bg-stone-400 text-white'} px-3 py-1 text-xs font-black uppercase tracking-widest">${h.type}</span>
+          <span class="text-black font-bold flex items-center gap-1">
+            <span class="material-symbols-outlined text-base">near_me</span> ${dist} km
+          </span>
+          ${h.verified ? `<span class="text-secondary text-xs font-bold flex items-center gap-1"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">verified</span>Verified</span>` : ''}
+          <span class="text-xs text-stone-400 font-medium">Score: ${h.score.total.toFixed(0)}/100</span>
+        </div>
+        <h2 class="text-3xl font-bold text-black mb-6 serif ${rank === 0 ? 'underline decoration-4 decoration-primary/30' : ''}">${h.name}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+          <div class="border-2 border-stone-200 p-4">
+            <p class="text-xs uppercase tracking-widest text-stone-600 font-bold mb-2">ICU Beds</p>
+            <p class="text-3xl font-black ${icuFull ? 'text-error' : 'text-black'}">
+              ${icuFull ? 'FULL' : String(h.beds.icu).padStart(2, '0')}
+              ${!icuFull ? '<span class="text-sm font-bold text-black uppercase tracking-wide">Available</span>' : ''}
+            </p>
+          </div>
+          <div class="border-2 border-stone-200 p-4">
+            <p class="text-xs uppercase tracking-widest text-stone-600 font-bold mb-2">General Beds</p>
+            <p class="text-3xl font-black text-black">${String(h.beds.general).padStart(2, '0')} <span class="text-sm font-bold text-black uppercase tracking-wide">Available</span></p>
+          </div>
+        </div>
+        <p class="text-xs text-stone-500 font-medium">Specialization: <span class="font-bold text-stone-700">${h.specialization}</span> &nbsp;|&nbsp; Schemes: ${h.govSchemes.join(', ')}</p>
+      </div>
+      <div class="flex flex-col gap-4 sm:w-56">
+        <button onclick="callHospital('${h.contact}')" class="bg-primary-container text-on-primary-container w-full py-5 rounded-lg font-black flex items-center justify-center gap-2 border-4 border-black active:translate-y-1 transition-all uppercase tracking-tighter">
+          <span class="material-symbols-outlined font-bold">call</span> CALL EMERGENCY
+        </button>
+        <button onclick="navigateTo(${h.lat}, ${h.lng}, '${h.name}')" class="bg-white text-black border-2 border-black w-full py-4 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-stone-100 transition-all uppercase text-sm">
+          <span class="material-symbols-outlined">directions</span> NAVIGATE
+        </button>
+      </div>
+    </div>
+  </article>`;
+    }
+
+    // ── Build AI recommendation prompt & call Claude ──────────────────────────
+    async function getAIRecommendation(hospitals, patientContext) {
+      const panel = document.getElementById('ai-panel');
+      const aiDiv = document.getElementById('ai-recommendation');
+      const aiLoading = document.getElementById('ai-loading');
+
+      panel.classList.remove('hidden');
+      aiLoading.classList.remove('hidden');
+      aiDiv.innerHTML = '';
+
+      const top3 = hospitals.slice(0, 3);
+      const prompt = `You are a medical referral AI assistant for a rural healthcare network in India. A patient needs emergency care.
+
+Patient location: ${userLat ? `${userLat.toFixed(4)}, ${userLng.toFixed(4)}` : 'Unknown (Delhi NCR area)'}
+
+Top 3 nearest verified hospitals (pre-scored by our algorithm):
+${top3.map((h, i) => `${i + 1}. ${h.name} (${h.type})
+   - Distance: ${h.score.dist.toFixed(1)} km
+   - ICU Beds: ${h.beds.icu === 0 ? 'FULL' : h.beds.icu + ' available'}
+   - General Beds: ${h.beds.general} available
+   - Specialization: ${h.specialization}
+   - Rating: ${h.rating}/5
+   - Govt Schemes: ${h.govSchemes.join(', ')}
+   - Score: ${h.score.total.toFixed(0)}/100`).join('\n\n')}
+
+${patientContext ? `Patient condition/context: ${patientContext}` : ''}
+
+In 2-3 concise sentences, explain which hospital you recommend for immediate emergency care and WHY — citing specific factors like bed availability, distance, specialization match, and government scheme coverage. Be direct and clinical. Do not use markdown.`;
+
+      try {
+        const resp = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 1000,
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+        const data = await resp.json();
+        const text = data.content?.[0]?.text || "Recommendation unavailable.";
+        aiLoading.classList.add('hidden');
+        aiDiv.innerHTML = `<p class="ai-reasoning">${text}</p>
+      <p class="text-xs text-stone-400 mt-2 font-medium uppercase tracking-wider">Based on: bed availability · distance · specialization · govt schemes · facility rating</p>`;
+      } catch (e) {
+        aiLoading.classList.add('hidden');
+        aiDiv.innerHTML = `<p class="ai-reasoning text-stone-500">AI recommendation unavailable offline. Hospitals are sorted by our scoring algorithm (distance + beds + rating).</p>`;
+      }
+    }
+
+    // ── Render all hospitals ──────────────────────────────────────────────────
+    function renderHospitals(lat, lng) {
+      const sorted = getSortedHospitals(lat, lng);
+      const container = document.getElementById('hospitals-container');
+      container.innerHTML = sorted.map((h, i) => renderCard(h, i)).join('');
+      getAIRecommendation(sorted, sessionStorage.getItem('rc_patient_concern') || '');
+      if (leafletMap) updateMapMarkers(sorted, lat, lng);
+    }
+
+    // ── OpenStreetMap (Leaflet) integration ───────────────────────────────────
+    function initMap(lat, lng) {
+      if (leafletMap) { leafletMap.remove(); leafletMap = null; }
+      leafletMap = L.map('map').setView([lat, lng], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18,
+        // Use cached tiles when available (Leaflet does this automatically)
+      }).addTo(leafletMap);
+
+      // User marker
+      L.circleMarker([lat, lng], { radius: 10, color: '#ba1a1a', fillColor: '#ba1a1a', fillOpacity: 0.9 })
+        .addTo(leafletMap)
+        .bindPopup('<b>Your Location</b>').openPopup();
+
+      updateMapMarkers(getSortedHospitals(lat, lng), lat, lng);
+    }
+
+    function updateMapMarkers(hospitals, userLat, userLng) {
+      if (!leafletMap) return;
+      // Clear old hospital markers (keep user marker layer)
+      leafletMap.eachLayer(layer => {
+        if (layer._isHospitalMarker) leafletMap.removeLayer(layer);
+      });
+
+      hospitals.forEach((h, i) => {
+        const color = i === 0 ? '#765b00' : (i === 1 ? '#4b6457' : '#7f7664');
+        const marker = L.circleMarker([h.lat, h.lng], {
+          radius: 10 - i,
+          color,
+          fillColor: color,
+          fillOpacity: 0.8
+        }).addTo(leafletMap);
+        marker._isHospitalMarker = true;
+        marker.bindPopup(`
+      <b>${h.name}</b><br>
+      ${h.type}<br>
+      ICU: ${h.beds.icu === 0 ? 'FULL' : h.beds.icu} | General: ${h.beds.general}<br>
+      <a href="https://www.openstreetmap.org/directions?from=${userLat},${userLng}&to=${h.lat},${h.lng}" target="_blank">Get Directions</a>
+    `);
+      });
+    }
+
+    // ── Navigation (OpenStreetMap) ────────────────────────────────────────────
+    function navigateTo(lat, lng, name) {
+      if (userLat && userLng) {
+        window.open(`https://www.openstreetmap.org/directions?from=${userLat},${userLng}&to=${lat},${lng}&engine=osrm_car`, '_blank');
+      } else {
+        window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=14`, '_blank');
+      }
+    }
+
+    // ── Emergency call ────────────────────────────────────────────────────────
+    function callHospital(number) {
+      if (confirm(`Calling ${number}. Proceed?`)) {
+        window.location.href = `tel:${number.replace(/[^+\d]/g, '')}`;
+      }
+    }
+
+    function callEmergency() {
+      if (confirm('Calling Emergency Services (112). Proceed?')) {
+        window.location.href = 'tel:112';
+      }
+    }
+
+    // ── View toggle ───────────────────────────────────────────────────────────
+    function switchView(view) {
+      currentView = view;
+      document.getElementById('list-view').style.display = view === 'list' ? '' : 'none';
+      document.getElementById('map-view').style.display = view === 'map' ? '' : 'none';
+      document.getElementById('list-view-btn').classList.toggle('active', view === 'list');
+      document.getElementById('map-view-btn').classList.toggle('active', view === 'map');
+
+      if (view === 'map' && userLat && !leafletMap) {
+        initMap(userLat, userLng);
+      }
+      if (view === 'map' && leafletMap) {
+        setTimeout(() => leafletMap.invalidateSize(), 100);
+      }
+    }
+
+    // ── Geolocation init ──────────────────────────────────────────────────────
+    function initLocation() {
+      const locText = document.getElementById('location-text');
+
+      // Try cached location first (fast load on low internet)
+      const cached = JSON.parse(sessionStorage.getItem('rc_location') || 'null');
+      if (cached) {
+        userLat = cached.lat; userLng = cached.lng;
+        locText.innerHTML = `<span class="text-secondary">✓</span> Location active`;
+        document.querySelector('#location-info .material-symbols-outlined').classList.remove('loading-pulse');
+        renderHospitals(userLat, userLng);
+      }
+
+      if (!navigator.geolocation) {
+        if (!cached) {
+          // Fallback: Delhi NCR center
+          userLat = 28.6139; userLng = 77.2090;
+          locText.textContent = 'Location unavailable — showing Delhi NCR facilities';
+          renderHospitals(userLat, userLng);
+        }
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          userLat = pos.coords.latitude;
+          userLng = pos.coords.longitude;
+          sessionStorage.setItem('rc_location', JSON.stringify({ lat: userLat, lng: userLng }));
+          locText.innerHTML = `<span class="text-secondary">✓</span> Live location: ${userLat.toFixed(3)}, ${userLng.toFixed(3)}`;
+          document.querySelector('#location-info .material-symbols-outlined').classList.remove('loading-pulse');
+          renderHospitals(userLat, userLng);
+          if (currentView === 'map') initMap(userLat, userLng);
+        },
+        () => {
+          if (!cached) {
+            userLat = 28.6139; userLng = 77.2090;
+            locText.textContent = 'Permission denied — showing Delhi NCR';
+            renderHospitals(userLat, userLng);
+          }
+        },
+        { timeout: 8000, maximumAge: 300000, enableHighAccuracy: false }
+      );
+    }
+
+    window.addEventListener('DOMContentLoaded', initLocation);
+  </script>
+</body>
+
+</html>

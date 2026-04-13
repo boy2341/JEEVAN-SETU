@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Jeevan Setu</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Work+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary": "#ffffff", "inverse-on-surface": "#f3f0ef", "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#ebe7e7", "surface-dim": "#dcd9d9", "secondary": "#4b6457",
+            "on-primary-fixed": "#241a00", "on-primary-container": "#6f5500", "outline": "#7f7664",
+            "on-tertiary-container": "#5c584b", "on-background": "#1c1b1b", "on-tertiary": "#ffffff",
+            "on-secondary-fixed-variant": "#344c40", "surface-tint": "#765b00", "on-surface": "#1c1b1b",
+            "tertiary": "#625e51", "tertiary-container": "#d6cfbe", "on-secondary-container": "#4f685b",
+            "secondary-fixed-dim": "#b2cdbd", "outline-variant": "#d1c5b0", "on-secondary-fixed": "#072016",
+            "surface-container": "#f0edec", "inverse-primary": "#ebc254", "background": "#ffffff",
+            "on-error-container": "#93000a", "surface-variant": "#e5e2e1", "on-secondary": "#ffffff",
+            "surface": "#ffffff", "on-tertiary-fixed": "#1e1c11", "tertiary-fixed": "#e9e2d1",
+            "surface-container-highest": "#e5e2e1", "surface-container-low": "#f6f3f2",
+            "primary-fixed": "#ffdf93", "on-primary-fixed-variant": "#594400", "tertiary-fixed-dim": "#cdc6b6",
+            "on-tertiary-fixed-variant": "#4a473a", "error-container": "#ffdad6", "surface-bright": "#fcf8f8",
+            "secondary-fixed": "#cde9d9", "primary-fixed-dim": "#ebc254", "on-error": "#ffffff",
+            "primary": "#765b00", "error": "#ba1a1a", "secondary-container": "#cae6d6",
+            "inverse-surface": "#313030", "on-surface-variant": "#4d4636", "primary-container": "#f5cb5c"
+          },
+          "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+          "fontFamily": { "headline": ["Noto Serif"], "body": ["Work Sans"], "label": ["Work Sans"] }
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    body {
+      font-family: 'Work Sans', sans-serif;
+    }
+
+    h1,
+    h2,
+    h3,
+    .font-serif {
+      font-family: 'Noto Serif', serif;
+    }
+
+    #location-banner {
+      transition: all 0.3s ease;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+
+  <!-- Location Banner -->
+  <div id="location-banner"
+    class="bg-secondary text-white text-center py-2 text-xs font-bold tracking-wider uppercase hidden">
+    <span class="material-symbols-outlined text-sm align-middle">location_on</span>
+    <span id="location-text">Detecting your location...</span>
+  </div>
+
+  <!-- TopNavBar -->
+  <nav class="bg-white border-b border-stone-200 sticky top-0 z-50">
+    <div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+      <div class="text-2xl font-serif font-bold text-stone-900">Jeevan Setu</div>
+      <div class="hidden md:flex items-center space-x-8">
+        <a class="text-stone-700 font-medium hover:text-primary transition-colors" href="#">Find Care</a>
+        <a class="text-stone-700 font-medium hover:text-primary transition-colors" href="hospital.html">Register
+          Hospital</a>
+        <a class="text-stone-700 font-medium hover:text-primary transition-colors" href="emergency.html">Emergency
+          Info</a>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="flex space-x-2 text-stone-700">
+          <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors"
+            id="lang-icon">language</span>
+          <span
+            class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">account_circle</span>
+        </div>
+        <button onclick="window.location.href='emergency.html'"
+          class="bg-error text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-error/90 transition-all">
+          Emergency Call
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-grow flex flex-col items-center justify-center px-6 py-12 md:py-20">
+    <div class="max-w-4xl w-full text-center mb-16">
+      <h1 class="text-4xl md:text-6xl font-bold text-stone-900 mb-6 leading-tight">
+        Healthcare bridging the distance.
+      </h1>
+      <p class="text-xl text-stone-600 font-light max-w-2xl mx-auto leading-relaxed">
+        Dedicated medical support for rural communities. Select your portal to access specialized tools and records.
+      </p>
+      <div id="location-status" class="mt-4 text-sm text-stone-500 font-medium"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
+      <!-- Patient Services Card -->
+      <div
+        class="group bg-white p-8 md:p-12 rounded-2xl border-2 border-stone-100 shadow-sm hover:border-primary/30 transition-all flex flex-col">
+        <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-8">
+          <span class="material-symbols-outlined text-primary text-4xl"
+            style="font-variation-settings: 'FILL' 1;">person</span>
+        </div>
+        <h2 class="text-3xl font-bold text-stone-900 mb-4">Patient Services</h2>
+        <p class="text-stone-600 text-lg mb-10 leading-relaxed flex-grow">
+          Access your medical records, book consultations, and find nearby rural clinics.
+        </p>
+        <div class="space-y-4">
+          <button onclick="window.location.href='emergency.html'"
+            class="w-full bg-primary text-on-primary py-5 rounded-xl font-bold text-xl flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-md">
+            Enter Patient Portal
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+          <div class="grid grid-cols-2 gap-4">
+            <button onclick="window.location.href='emergency.html'"
+              class="flex items-center justify-center gap-2 py-4 bg-error/10 text-error rounded-xl font-bold hover:bg-error/20 transition-all">
+              <span class="material-symbols-outlined text-xl">emergency</span>
+              Emergency
+            </button>
+            <button onclick="window.location.href='referral.html'"
+              class="flex items-center justify-center gap-2 py-4 bg-stone-100 text-stone-700 rounded-xl font-bold hover:bg-stone-200 transition-all">
+              <span class="material-symbols-outlined text-xl">file_open</span>
+              Referral
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hospital Portal Card -->
+      <div
+        class="group bg-white p-8 md:p-12 rounded-2xl border-2 border-stone-100 shadow-sm hover:border-secondary/30 transition-all flex flex-col">
+        <div class="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mb-8">
+          <span class="material-symbols-outlined text-secondary text-4xl">local_hospital</span>
+        </div>
+        <h2 class="text-3xl font-bold text-stone-900 mb-4">Hospital Portal</h2>
+        <p class="text-stone-600 text-lg mb-10 leading-relaxed flex-grow">
+          Register your facility, manage national rural database access, and coordinate emergency logistics.
+        </p>
+        <div class="space-y-4">
+          <button onclick="window.location.href='hospital.html'"
+            class="w-full bg-secondary text-white py-5 rounded-xl font-bold text-xl flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-md">
+            Hospital Login
+            <span class="material-symbols-outlined">shield_person</span>
+          </button>
+          <button onclick="window.location.href='hospital.html'"
+            class="w-full py-4 border-2 border-secondary text-secondary rounded-xl font-bold hover:bg-secondary/5 transition-all">
+            Register New Facility
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-stone-50 border-t border-stone-200 py-12">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <div>
+        <div class="text-lg font-serif font-bold text-stone-900 mb-4">Jeevan Setu Health Network</div>
+        <p class="text-stone-500 text-sm max-w-sm mb-4">
+          Committed to accessible rural healthcare and bridging the gap between remote communities and high-quality
+          medical expertise.
+        </p>
+        <p class="text-xs font-medium uppercase tracking-wider text-stone-400">© 2024 Jeevan Setu Health Network. All
+          rights reserved.</p>
+      </div>
+      <div class="flex flex-wrap gap-x-8 gap-y-4 md:justify-end">
+        <a class="text-stone-600 text-sm hover:text-stone-900 transition-colors" href="#">Privacy Policy</a>
+        <a class="text-stone-600 text-sm hover:text-stone-900 transition-colors" href="#">Terms of Service</a>
+        <a class="text-stone-600 text-sm hover:text-stone-900 transition-colors" href="#">Contact Support</a>
+        <a class="text-stone-600 text-sm font-bold hover:text-primary transition-colors" href="#">Accessibility</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Jeevan Setu Core Module ──────────────────────────────────────
+    // Lightweight local "database" stored in localStorage (works offline)
+    const DB = {
+      hospitals: [
+        { id: 1, name: "St. Jude Rural Medical Center", type: "Level 1 Trauma", lat: 28.6448, lng: 77.2167, contact: "+91-11-2345-6789", beds: { icu: 4, general: 28 }, specialization: "Trauma & Emergency", govSchemes: ["PM-JAY", "CGHS"], verified: true, rating: 5, govId: "DL-HOSP-001" },
+        { id: 2, name: "Valley View Specialty Clinic", type: "Community Hospital", lat: 28.6289, lng: 77.2065, contact: "+91-11-2345-7890", beds: { icu: 12, general: 45 }, specialization: "Maternal & Child Care", govSchemes: ["PM-JAY", "State Health"], verified: true, rating: 4, govId: "DL-HOSP-002" },
+        { id: 3, name: "Mountain Ridge General", type: "Regional General", lat: 28.5921, lng: 77.0460, contact: "+91-11-2345-8901", beds: { icu: 0, general: 8 }, specialization: "General Healthcare", govSchemes: ["State Health"], verified: true, rating: 3, govId: "UP-HOSP-012" },
+        { id: 4, name: "Aravali Primary Health Centre", type: "PHC", lat: 28.4595, lng: 77.0266, contact: "+91-124-456-7890", beds: { icu: 2, general: 20 }, specialization: "General Healthcare", govSchemes: ["PM-JAY", "ESI"], verified: true, rating: 4, govId: "HR-HOSP-045" },
+        { id: 5, name: "Ganga Rural Medical Trust", type: "Community Hospital", lat: 28.7041, lng: 77.1025, contact: "+91-11-3456-7890", beds: { icu: 6, general: 35 }, specialization: "Cardiovascular Services", govSchemes: ["PM-JAY", "CGHS", "ESI"], verified: true, rating: 5, govId: "DL-HOSP-033" },
+      ],
+      get: (key) => { try { return JSON.parse(localStorage.getItem('Jeevan Setu_' + key)); } catch { return null; } },
+      set: (key, val) => { try { localStorage.setItem('Jeevan Setu_' + key, JSON.stringify(val)); } catch { } }
+    };
+
+    // Initialize DB in localStorage if not present
+    if (!DB.get('hospitals')) DB.set('hospitals', DB.hospitals);
+
+    // Geolocation
+    function initLocation() {
+      const banner = document.getElementById('location-banner');
+      const text = document.getElementById('location-text');
+      const status = document.getElementById('location-status');
+
+      if (!navigator.geolocation) {
+        status.textContent = 'Location unavailable — showing all facilities';
+        return;
+      }
+
+      banner.classList.remove('hidden');
+      text.textContent = 'Detecting your location...';
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          DB.set('userLocation', { lat: latitude, lng: longitude });
+          const loc = reverseGeocode(latitude, longitude);
+          text.textContent = `Location detected — showing facilities near you`;
+          status.innerHTML = `<span class="material-symbols-outlined text-sm align-middle text-secondary">check_circle</span> Location active`;
+          setTimeout(() => banner.classList.add('hidden'), 3000);
+        },
+        () => {
+          banner.classList.add('hidden');
+          status.textContent = 'Location permission denied — showing all facilities';
+        },
+        { timeout: 8000, maximumAge: 300000 }
+      );
+    }
+
+    // Simple reverse-geocode approximation (no network needed)
+    function reverseGeocode(lat, lng) { return `${lat.toFixed(3)}, ${lng.toFixed(3)}`; }
+
+    // Haversine distance (km)
+    function haversine(lat1, lng1, lat2, lng2) {
+      const R = 6371, toRad = x => x * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    window.addEventListener('DOMContentLoaded', initLocation);
+  </script>
+</body>
+
+</html>

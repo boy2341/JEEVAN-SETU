@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Jeevan Setu | Patient Referral Intake</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary": "#ffffff", "inverse-on-surface": "#000000", "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#dddddd", "surface-dim": "#cccccc", "secondary": "#222222",
+            "on-primary-fixed": "#000000", "on-primary-container": "#000000", "outline": "#000000",
+            "on-background": "#000000", "on-tertiary": "#ffffff", "surface-tint": "#000000",
+            "on-surface": "#000000", "outline-variant": "#999999", "surface-container": "#f2f2f2",
+            "inverse-primary": "#000000", "background": "#ffffff", "surface-variant": "#eeeeee",
+            "on-secondary": "#ffffff", "surface": "#ffffff", "surface-container-highest": "#cccccc",
+            "surface-container-low": "#f9f9f9", "primary-fixed": "#000000", "error-container": "#000000",
+            "surface-bright": "#ffffff", "secondary-fixed": "#cccccc", "primary-fixed-dim": "#000000",
+            "on-error": "#ffffff", "primary": "#000000", "error": "#ff0000", "secondary-container": "#eeeeee",
+            "inverse-surface": "#000000", "on-surface-variant": "#000000", "primary-container": "#eeeeee"
+          },
+          "borderRadius": { "DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "0px" },
+          "fontFamily": { "headline": ["Noto Serif", "serif"], "body": ["Work Sans", "sans-serif"], "label": ["Work Sans", "sans-serif"] }
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    body {
+      font-family: 'Work Sans', sans-serif;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Noto Serif', serif;
+    }
+
+    input,
+    select,
+    textarea {
+      border-radius: 0 !important;
+    }
+
+    button {
+      border-radius: 0 !important;
+      border: 2px solid #000 !important;
+    }
+
+    .results-card {
+      border: 2px solid black;
+      margin-bottom: 1rem;
+      padding: 1.5rem;
+    }
+
+    .ai-block {
+      border-left: 4px solid black;
+      padding-left: 1rem;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .loading-pulse {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.4
+      }
+    }
+
+    .rank-badge {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background: black;
+      color: white;
+      text-align: center;
+      line-height: 24px;
+      font-size: 11px;
+      font-weight: 900;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex flex-col antialiased">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-white border-b-2 border-black sticky top-0 z-50">
+    <nav class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+      <a href="entry.html" class="text-2xl font-bold uppercase tracking-tight">Jeevan Setu</a>
+      <div class="hidden md:flex items-center space-x-6">
+        <a class="text-black font-bold uppercase text-xs hover:underline" href="entry.html">Find Care</a>
+        <a class="text-black font-bold uppercase text-xs hover:underline" href="hospital.html">Register Hospital</a>
+        <a class="text-black font-bold uppercase text-xs hover:underline" href="emergency.html">Emergency Info</a>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button onclick="window.location.href='emergency.html'"
+          class="bg-black text-white px-4 py-2 font-bold text-xs uppercase">Emergency Call</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-grow max-w-4xl mx-auto w-full px-6 py-8">
+    <!-- Progress Stepper -->
+    <div class="mb-8" id="stepper">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-xs uppercase font-bold" id="step-label">Step 2 of 4</span>
+        <span class="text-xs uppercase font-bold" id="step-name">Patient Information</span>
+      </div>
+      <div class="h-2 w-full bg-surface-container-high border border-black">
+        <div class="h-full bg-black transition-all" id="progress-bar" style="width: 50%"></div>
+      </div>
+    </div>
+
+    <!-- FORM SECTION -->
+    <div id="form-section">
+      <div class="border-b-4 border-black pb-6 mb-10">
+        <h1 class="text-4xl md:text-5xl font-bold text-on-surface uppercase mb-4">Patient Referral Intake</h1>
+        <p class="text-lg font-medium max-w-2xl">Enter patient details accurately for rural healthcare network matching.
+        </p>
+      </div>
+
+      <section>
+        <form id="referral-form" class="space-y-12">
+          <!-- Personal Identity -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <label class="block text-xs font-bold uppercase mb-2" for="fullname">Full Name</label>
+              <input class="w-full border-2 border-black p-3 text-lg focus:bg-black focus:text-white transition-colors"
+                id="fullname" placeholder="Legal name" type="text" required />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase mb-2" for="location">Current Location / District</label>
+              <input class="w-full border-2 border-black p-3 text-lg focus:bg-black focus:text-white transition-colors"
+                id="location" placeholder="District name" type="text" />
+            </div>
+          </div>
+
+          <!-- Vitals -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <label class="block text-xs font-bold uppercase mb-2" for="age">Age</label>
+              <input class="w-full border-2 border-black p-3 text-lg focus:bg-black focus:text-white transition-colors"
+                id="age" placeholder="Years" type="number" min="0" max="120" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase mb-2" for="gender">Gender</label>
+              <select class="w-full border-2 border-black p-3 text-lg focus:bg-black focus:text-white transition-colors"
+                id="gender">
+                <option disabled selected value="">Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase mb-2" for="weight">Weight (kg)</label>
+              <input class="w-full border-2 border-black p-3 text-lg focus:bg-black focus:text-white transition-colors"
+                id="weight" placeholder="kg" type="number" min="1" max="300" />
+            </div>
+          </div>
+
+          <!-- Social & Eligibility -->
+          <div class="pt-8 border-t-2 border-black">
+            <h3 class="text-lg font-bold uppercase mb-6">Social &amp; Eligibility Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <label class="block text-xs font-bold uppercase mb-2" for="income">Household Income Category</label>
+                <select
+                  class="w-full border-2 border-black p-3 text-lg focus:bg-black focus:text-white transition-colors"
+                  id="income">
+                  <option disabled selected value="">Select Income Slab</option>
+                  <option value="bpl">Below Poverty Line (BPL)</option>
+                  <option value="low">Low Income Group</option>
+                  <option value="middle">Middle Income Group</option>
+                  <option value="high">High Income Group</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase mb-2" for="social-category">Social Category</label>
+                <select
+                  class="w-full border-2 border-black p-3 text-lg focus:bg-black focus:text-white transition-colors"
+                  id="social-category">
+                  <option disabled selected value="">Select Category</option>
+                  <option value="general">General</option>
+                  <option value="obc">OBC</option>
+                  <option value="sc">SC</option>
+                  <option value="st">ST</option>
+                </select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold uppercase mb-2" for="health-card">Existing Government Health
+                  Cards</label>
+                <input
+                  class="w-full border-2 border-black p-3 text-lg focus:bg-black focus:text-white transition-colors"
+                  id="health-card" placeholder="Ayushman Bharat ID / State Health Card No." type="text" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Clinical Priority -->
+          <div class="pt-8 border-t-2 border-black">
+            <div>
+              <label class="block text-xs font-bold uppercase mb-2" for="concern">Primary Medical Concern</label>
+              <textarea
+                class="w-full border-2 border-black p-4 text-lg focus:bg-black focus:text-white transition-colors"
+                id="concern" placeholder="Describe symptoms and duration..." rows="4"></textarea>
+            </div>
+          </div>
+
+          <!-- Action Bar -->
+          <div class="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t-4 border-black">
+            <button
+              class="w-full md:w-auto bg-white text-black px-8 py-4 font-bold uppercase flex items-center justify-center gap-2"
+              type="button" onclick="window.history.back()">
+              <span class="material-symbols-outlined">arrow_back</span> Previous
+            </button>
+            <button
+              class="w-full md:w-auto bg-black text-white px-10 py-5 font-bold text-xl uppercase flex items-center justify-center gap-3"
+              type="submit" id="find-btn">
+              Find Hospitals
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <!-- RESULTS SECTION (hidden initially) -->
+    <div id="results-section" class="hidden">
+      <div class="border-b-4 border-black pb-6 mb-10">
+        <h1 class="text-4xl md:text-5xl font-bold text-on-surface uppercase mb-4">Matched Hospitals</h1>
+        <p class="text-lg font-medium max-w-2xl" id="results-subtitle">Best matches for your referral</p>
+      </div>
+
+      <!-- AI Summary -->
+      <div id="ai-results-panel" class="border-2 border-black p-6 mb-8 bg-surface-container-low">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="bg-black text-white text-xs font-black px-2 py-1 uppercase tracking-widest">AI Analysis</span>
+          <span id="ai-results-loading" class="loading-pulse text-xs text-stone-400 hidden">Analyzing patient
+            data...</span>
+        </div>
+        <div id="ai-results-text" class="text-sm leading-relaxed text-stone-700"></div>
+      </div>
+
+      <!-- Hospital Results List -->
+      <div id="matched-hospitals"></div>
+
+      <!-- Back to form -->
+      <div class="pt-8 border-t-4 border-black flex gap-4">
+        <button onclick="showForm()" class="bg-white text-black px-8 py-4 font-bold uppercase flex items-center gap-2">
+          <span class="material-symbols-outlined">arrow_back</span> Modify Details
+        </button>
+        <button onclick="window.location.href='emergency.html'"
+          class="bg-black text-white px-8 py-4 font-bold uppercase flex items-center gap-2">
+          <span class="material-symbols-outlined">emergency</span> Emergency View
+        </button>
+      </div>
+    </div>
+
+    <!-- Info Grid -->
+    <div id="info-grid" class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-0 border-2 border-black">
+      <div class="p-8 border-b-2 md:border-b-0 md:border-r-2 border-black">
+        <h3 class="text-xl font-bold uppercase mb-4">Security Notice</h3>
+        <p class="text-sm font-medium leading-relaxed uppercase">Medical data is encrypted and shared only with verified
+          facilities in compliance with standards.</p>
+      </div>
+      <div class="p-8">
+        <h3 class="text-xl font-bold uppercase mb-4">Urgent Help</h3>
+        <p class="text-sm font-medium mb-4 uppercase">Dispatch team active 24/7 for urgent referrals.</p>
+        <a class="inline-block border-2 border-black px-4 py-2 font-bold uppercase text-xs" href="tel:112">Call
+          Support</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-black text-white p-12 mt-12">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+      <div>
+        <div class="text-lg font-bold uppercase mb-2">Jeevan Setu Health Network</div>
+        <p class="text-[10px] uppercase tracking-widest opacity-70">© 2024 Jeevan Setu Health Network. All rights
+          reserved.</p>
+      </div>
+      <div class="flex flex-wrap gap-6">
+        <a class="text-[10px] font-bold uppercase tracking-widest hover:underline" href="#">Privacy</a>
+        <a class="text-[10px] font-bold uppercase tracking-widest hover:underline" href="#">Terms</a>
+        <a class="text-[10px] font-bold uppercase tracking-widest hover:underline" href="#">Support</a>
+        <a class="text-[10px] font-bold uppercase tracking-widest hover:underline" href="#">Emergency</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const HOSPITALS = [
+      { id: 1, name: "St. Jude Rural Medical Center", type: "Level 1 Trauma", lat: 28.6448, lng: 77.2167, contact: "+91-11-2345-6789", beds: { icu: 4, general: 28 }, specialization: "Trauma & Emergency", govSchemes: ["PM-JAY", "CGHS"], verified: true, rating: 5 },
+      { id: 2, name: "Valley View Specialty Clinic", type: "Community Hospital", lat: 28.6289, lng: 77.2065, contact: "+91-11-2345-7890", beds: { icu: 12, general: 45 }, specialization: "Maternal & Child Care", govSchemes: ["PM-JAY", "State Health"], verified: true, rating: 4 },
+      { id: 3, name: "Mountain Ridge General", type: "Regional General", lat: 28.5921, lng: 77.0460, contact: "+91-11-2345-8901", beds: { icu: 0, general: 8 }, specialization: "General Healthcare", govSchemes: ["State Health"], verified: true, rating: 3 },
+      { id: 4, name: "Aravali Primary Health Centre", type: "PHC", lat: 28.4595, lng: 77.0266, contact: "+91-124-456-7890", beds: { icu: 2, general: 20 }, specialization: "General Healthcare", govSchemes: ["PM-JAY", "ESI"], verified: true, rating: 4 },
+      { id: 5, name: "Ganga Rural Medical Trust", type: "Community Hospital", lat: 28.7041, lng: 77.1025, contact: "+91-11-3456-7890", beds: { icu: 6, general: 35 }, specialization: "Cardiovascular Services", govSchemes: ["PM-JAY", "CGHS", "ESI"], verified: true, rating: 5 },
+    ];
+
+    let userLat = 28.6139, userLng = 77.2090; // Default: Delhi
+
+    function haversine(lat1, lng1, lat2, lng2) {
+      const R = 6371, r = x => x * Math.PI / 180;
+      const dLat = r(lat2 - lat1), dLng = r(lng2 - lng1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(r(lat1)) * Math.cos(r(lat2)) * Math.sin(dLng / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    // Score with patient-specific boost (scheme match, specialization relevance)
+    function scoreForReferral(h, userLat, userLng, patientData) {
+      const dist = haversine(userLat, userLng, h.lat, h.lng);
+      const totalBeds = h.beds.icu + h.beds.general;
+      let score = 0;
+      score += Math.min(totalBeds / 60, 1) * 30;
+      score += Math.max(0, (100 - dist * 3) / 100) * 25;
+      score += (h.rating / 5) * 15;
+      score += h.beds.icu > 0 ? 10 : 0;
+      // Scheme match bonus
+      const hasCard = (patientData.healthCard || '').toLowerCase();
+      if (hasCard.includes('ayushman') && h.govSchemes.includes('PM-JAY')) score += 10;
+      if (hasCard && h.govSchemes.length > 1) score += 5;
+      // Income-based scheme bonus
+      if (['bpl', 'low'].includes(patientData.income) && h.govSchemes.includes('PM-JAY')) score += 5;
+      score += Math.min(h.govSchemes.length / 4, 1) * 5;
+      return { total: Math.min(score, 100), dist };
+    }
+
+    function showForm() {
+      document.getElementById('form-section').classList.remove('hidden');
+      document.getElementById('results-section').classList.add('hidden');
+      document.getElementById('stepper').style.display = '';
+      document.getElementById('info-grid').classList.remove('hidden');
+    }
+
+    function showResults() {
+      document.getElementById('form-section').classList.add('hidden');
+      document.getElementById('results-section').classList.remove('hidden');
+      document.getElementById('stepper').style.display = 'none';
+      document.getElementById('info-grid').classList.add('hidden');
+      // Update progress to step 3
+      document.getElementById('step-label').textContent = 'Step 3 of 4';
+      document.getElementById('step-name').textContent = 'Hospital Matches';
+      document.getElementById('progress-bar').style.width = '75%';
+    }
+
+    function renderResultCard(h, rank) {
+      const dist = h.score.dist.toFixed(1);
+      const icuFull = h.beds.icu === 0;
+      const mapUrl = `https://www.openstreetmap.org/?mlat=${h.lat}&mlon=${h.lng}&zoom=14`;
+      const navUrl = `https://www.openstreetmap.org/directions?from=${userLat},${userLng}&to=${h.lat},${h.lng}&engine=osrm_car`;
+
+      return `
+  <div class="results-card">
+    <div class="flex flex-col sm:flex-row justify-between gap-6">
+      <div class="flex-grow">
+        <div class="flex items-center gap-3 mb-3 flex-wrap">
+          <span class="rank-badge">${rank + 1}</span>
+          <span class="font-black text-xs uppercase tracking-widest border border-black px-2 py-1">${h.type}</span>
+          <span class="text-xs font-bold">${dist} km away</span>
+          ${h.verified ? `<span class="text-xs font-bold text-stone-600">✓ Verified</span>` : ''}
+          <span class="text-xs text-stone-400">Match: ${h.score.total.toFixed(0)}%</span>
+        </div>
+        <h3 class="text-2xl font-bold mb-3">${h.name}</h3>
+        <div class="grid grid-cols-3 gap-4 mb-4 text-sm">
+          <div class="border border-black p-2 text-center">
+            <div class="text-xs uppercase font-bold text-stone-500 mb-1">ICU</div>
+            <div class="font-black text-lg ${icuFull ? 'text-red-600' : ''}">${icuFull ? 'FULL' : h.beds.icu}</div>
+          </div>
+          <div class="border border-black p-2 text-center">
+            <div class="text-xs uppercase font-bold text-stone-500 mb-1">General</div>
+            <div class="font-black text-lg">${h.beds.general}</div>
+          </div>
+          <div class="border border-black p-2 text-center">
+            <div class="text-xs uppercase font-bold text-stone-500 mb-1">Rating</div>
+            <div class="font-black text-lg">${'★'.repeat(h.rating)}${'☆'.repeat(5 - h.rating)}</div>
+          </div>
+        </div>
+        <p class="text-xs text-stone-600 font-medium">
+          <span class="font-bold">Specialization:</span> ${h.specialization} &nbsp;|&nbsp;
+          <span class="font-bold">Schemes:</span> ${h.govSchemes.join(' · ')}
+        </p>
+      </div>
+      <div class="flex flex-col gap-3 sm:w-48">
+        <button onclick="callHosp('${h.contact}')" class="bg-black text-white w-full py-3 font-bold text-sm uppercase flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-sm">call</span> Call Hospital
+        </button>
+        <a href="${navUrl}" target="_blank" class="border-2 border-black bg-white text-black w-full py-3 font-bold text-sm uppercase flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-sm">directions</span> Navigate
+        </a>
+        <a href="${mapUrl}" target="_blank" class="border border-black text-black text-xs font-bold uppercase flex items-center justify-center gap-1 py-2">
+          <span class="material-symbols-outlined text-xs">map</span> View on Map
+        </a>
+      </div>
+    </div>
+  </div>`;
+    }
+
+    function callHosp(number) {
+      if (confirm(`Calling ${number}. Proceed?`)) window.location.href = `tel:${number.replace(/[^+\d]/g, '')}`;
+    }
+
+    async function getAIReferralAnalysis(patientData, hospitals) {
+      const loadEl = document.getElementById('ai-results-loading');
+      const textEl = document.getElementById('ai-results-text');
+      loadEl.classList.remove('hidden');
+      textEl.textContent = '';
+
+      const top3 = hospitals.slice(0, 3);
+      const prompt = `You are a medical referral coordinator for rural India. A patient has submitted a referral intake form.
+
+Patient Details:
+- Name: ${patientData.name || 'Not provided'}
+- Age: ${patientData.age || 'Unknown'}, Gender: ${patientData.gender || 'Unknown'}
+- Location: ${patientData.location || 'Unknown'}
+- Income Category: ${patientData.income || 'Not specified'}
+- Social Category: ${patientData.socialCategory || 'Not specified'}
+- Health Cards: ${patientData.healthCard || 'None mentioned'}
+- Primary Medical Concern: ${patientData.concern || 'Not specified'}
+
+Top 3 matched hospitals (pre-ranked by algorithm):
+${top3.map((h, i) => `${i + 1}. ${h.name}
+   - Distance: ${h.score.dist.toFixed(1)} km | Type: ${h.type}
+   - ICU beds: ${h.beds.icu === 0 ? 'FULL' : h.beds.icu} | General beds: ${h.beds.general}
+   - Specialization: ${h.specialization}
+   - Government schemes accepted: ${h.govSchemes.join(', ')}
+   - Rating: ${h.rating}/5 | Match score: ${h.score.total.toFixed(0)}%`).join('\n\n')}
+
+In 3-4 concise sentences: (1) Recommend the best hospital for this specific patient and why — mentioning their condition, eligibility for government schemes, distance, and bed availability. (2) Note if any hospital is a particularly strong match for their condition or income eligibility. Be direct, clinical, and helpful. Do not use markdown or bullet points.`;
+
+      try {
+        const resp = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 1000,
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+        const data = await resp.json();
+        loadEl.classList.add('hidden');
+        textEl.innerHTML = data.content?.[0]?.text || "Analysis unavailable.";
+      } catch {
+        loadEl.classList.add('hidden');
+        textEl.innerHTML = "AI analysis unavailable offline. Hospitals are ranked by our matching algorithm — distance, bed availability, scheme compatibility, and specialization.";
+      }
+    }
+
+    document.getElementById('referral-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('find-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-pulse">Matching hospitals...</span>';
+
+      const patientData = {
+        name: document.getElementById('fullname').value,
+        location: document.getElementById('location').value,
+        age: document.getElementById('age').value,
+        gender: document.getElementById('gender').value,
+        weight: document.getElementById('weight').value,
+        income: document.getElementById('income').value,
+        socialCategory: document.getElementById('social-category').value,
+        healthCard: document.getElementById('health-card').value,
+        concern: document.getElementById('concern').value,
+      };
+
+      // Save concern for emergency page
+      sessionStorage.setItem('rc_patient_concern', patientData.concern);
+
+      // Get cached location
+      const cached = JSON.parse(sessionStorage.getItem('rc_location') || 'null');
+      if (cached) { userLat = cached.lat; userLng = cached.lng; }
+
+      // Score and sort
+      const scored = HOSPITALS.map(h => ({
+        ...h, score: scoreForReferral(h, userLat, userLng, patientData)
+      })).sort((a, b) => b.score.total - a.score.total);
+
+      // Show results
+      showResults();
+      document.getElementById('results-subtitle').textContent =
+        `${scored.length} facilities matched · Sorted by: scheme eligibility + distance + bed availability`;
+
+      document.getElementById('matched-hospitals').innerHTML = scored.map((h, i) => renderResultCard(h, i)).join('');
+
+      await getAIReferralAnalysis(patientData, scored);
+
+      btn.disabled = false;
+      btn.innerHTML = 'Find Hospitals <span class="material-symbols-outlined">arrow_forward</span>';
+    });
+
+    // Get user location on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const cached = JSON.parse(sessionStorage.getItem('rc_location') || 'null');
+      if (cached) { userLat = cached.lat; userLng = cached.lng; return; }
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            userLat = pos.coords.latitude; userLng = pos.coords.longitude;
+            sessionStorage.setItem('rc_location', JSON.stringify({ lat: userLat, lng: userLng }));
+          },
+          () => { },
+          { timeout: 6000, maximumAge: 300000, enableHighAccuracy: false }
+        );
+      }
+    });
+  </script>
+</body>
+
+</html>
